@@ -66,11 +66,11 @@
       <div class="grid cols-2">
         <div>
           <label>תעודת זהות (9 ספרות)</label>
-          <input id="loginId" inputmode="numeric" maxlength="9" placeholder="לדוגמה: 331131581">
+          <input id="loginId" inputmode="numeric" maxlength="9" placeholder="לדוגמה: ">
         </div>
         <div>
           <label>סיסמה</label>
-          <input id="loginPw" type="password" placeholder="******">
+          <input id="loginPw" type="password" placeholder="***">
         </div>
       </div>
       <div class="toolbar" style="margin-top:10px">
@@ -82,12 +82,12 @@
       <div class="grid cols-3">
         <div class="item">
           <div class="pill pri">מנהל ראשי</div>
-          <div class="mono" style="margin-top:6px">ת״ז: 331131581<br>סיסמה: 35810205</div>
+          <div class="mono" style="margin-top:6px">ת״ז: <br>סיסמה: </div>
           <div class="note">שם במערכת: “יהודה‑ניהול”.</div>
         </div>
         <div class="item">
           <div class="pill ok">מנהלים משניים</div>
-          <div class="note">ניתן להוספה רק מתוך הניהול, ורק לאחר הזנת סיסמת‑על 35810205.</div>
+          <div class="note">ניתן להוספה רק מתוך הניהול, ורק לאחר הזנת סיסמת‑על </div>
         </div>
         <div class="item">
           <div class="pill warn">שמירת נתונים</div>
@@ -351,7 +351,7 @@
           <div class="pill pri">הוספת מנהל משני</div>
           <div class="note">נדרש להזין כאן את סיסמת‑העל של המנהל הראשי בדווקא: <b>35810205</b>.</div>
           <label style="margin-top:6px">סיסמת‑על (אימות)</label>
-          <input id="superPw" type="password" placeholder="35810205">
+          <input id="superPw" type="password" placeholder="">
           <label>ת״ז מנהל חדש</label>
           <input id="mgrId" maxlength="9" inputmode="numeric">
           <label>שם מנהל</label>
@@ -396,10 +396,10 @@ function loadDB(){
       meta:{createdAt:new Date().toISOString()}
     };
     // יצירת מנהל ראשי אם חסר
-    const mainId="331131581";
+    const mainId="";
     const hasMain = db.users.some(u=>u.id===mainId && u.role==='manager' && u.main===true);
     if(!hasMain){
-      db.users.push({id:mainId,name:"יהודה-ניהול",pw:"35810205",role:"manager",main:true,rate:50,balance:0,createdAt:new Date().toISOString()});
+      db.users.push({id:mainId,name:"יהודה-ניהול",pw:"",role:"manager",main:true,rate:50,balance:0,createdAt:new Date().toISOString()});
     }
     saveDB(db);
   }
