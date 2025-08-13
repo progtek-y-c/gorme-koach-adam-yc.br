@@ -1,0 +1,479 @@
+<!doctype html>
+<html lang="he" dir="rtl">
+<head>
+  <meta charset="utf-8">
+  <title>מערכת שעות וניהול עובדים – GitHub Pages</title>
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <style>
+    :root{
+      --bg:#0f172a;--card:#111827;--muted:#1f2937;--text:#e5e7eb;--sub:#9ca3af;--ok:#22c55e;--warn:#f59e0b;--err:#ef4444;--pri:#3b82f6;
+    }
+    *{box-sizing:border-box} body{margin:0;font-family:system-ui,-apple-system,Segoe UI,Roboto,Heebo,Helvetica,Arial,sans-serif;background:var(--bg);color:var(--text)}
+    a{color:inherit}
+    .wrap{max-width:1050px;margin:auto;padding:24px}
+    h1{margin:0 0 12px;font-size:26px}
+    h2{margin:18px 0 10px;font-size:20px;color:var(--text)}
+    .row{display:flex;gap:12px;flex-wrap:wrap}
+    .card{background:var(--card);border:1px solid #222;padding:16px;border-radius:16px;box-shadow:0 3px 16px rgba(0,0,0,.25)}
+    .grow{flex:1}
+    .muted{color:var(--sub)}
+    .pill{display:inline-block;padding:.15rem .6rem;border-radius:999px;font-size:12px;background:var(--muted);color:var(--text)}
+    .ok{background:rgba(34,197,94,.15);color:#86efac;border:1px solid #14532d}
+    .warn{background:rgba(245,158,11,.15);color:#fde68a;border:1px solid #7c2d12}
+    .err{background:rgba(239,68,68,.15);color:#fecaca;border:1px solid #7f1d1d}
+    .pri{background:rgba(59,130,246,.15);color:#bfdbfe;border:1px solid #1e3a8a}
+    label{display:block;margin:.35rem 0 .2rem}
+    input,select,textarea{width:100%;padding:.6rem .7rem;border:1px solid #374151;border-radius:12px;background:#0b1220;color:var(--text);outline:none}
+    textarea{min-height:90px;resize:vertical}
+    input:focus,select:focus,textarea:focus{border-color:#3b82f6;box-shadow:0 0 0 3px rgba(59,130,246,.2)}
+    button{cursor:pointer;border:1px solid #1f2a44;background:linear-gradient(180deg,#0f1a2f,#0a1222);color:#e5e7eb;padding:.6rem 1rem;border-radius:12px}
+    button.pri{border-color:#1e3a8a;background:linear-gradient(180deg,#1e3a8a,#0b235c)}
+    button.ok{border-color:#14532d;background:linear-gradient(180deg,#14532d,#0b1f1a)}
+    button.warn{border-color:#7c2d12;background:linear-gradient(180deg,#7c2d12,#3a1308)}
+    button.err{border-color:#7f1d1d;background:linear-gradient(180deg,#7f1d1d,#3a0e10)}
+    .toolbar{display:flex;gap:8px;flex-wrap:wrap}
+    .grid{display:grid;gap:12px}
+    .grid.cols-2{grid-template-columns:repeat(2,minmax(0,1fr))}
+    .grid.cols-3{grid-template-columns:repeat(3,minmax(0,1fr))}
+    .right{float:left}
+    .list{display:grid;gap:10px}
+    .item{padding:12px;border:1px dashed #334155;border-radius:12px;background:#0b1220}
+    .hr{height:1px;background:#263248;margin:14px 0}
+    .center{text-align:center}
+    .hide{display:none}
+    .note{font-size:12px;color:#9ca3af}
+    .mono{font-family:ui-monospace,SFMono-Regular,Menlo,Monaco,Consolas,monospace}
+    .badge{font-size:12px;padding:.1rem .45rem;border-radius:8px;border:1px solid #334155}
+    .linky{border:0;background:transparent;text-decoration:underline;cursor:pointer;padding:0;color:#93c5fd}
+    table{border-collapse:collapse;width:100%;background:#0b1220;border-radius:12px;overflow:hidden}
+    th,td{border-bottom:1px solid #25304d;padding:10px 8px;text-align:right}
+    tr:last-child td{border-bottom:0}
+    .tot{font-weight:700}
+    .sticky{position:sticky;top:0;background:var(--bg);padding:10px 0;z-index:5}
+  </style>
+</head>
+<body>
+<div class="wrap">
+  <div class="sticky">
+    <h1>מערכת דיווח שעות וניהול</h1>
+    <div class="muted">סטטי על GitHub Pages · נתונים שמורים בדפדפן (localStorage). לשימוש פנימי בלבד.</div>
+  </div>
+
+  <!-- לוח התחברות/הרשמה -->
+  <div id="auth" class="row">
+    <div class="card grow">
+      <h2>התחברות</h2>
+      <div class="grid cols-2">
+        <div>
+          <label>תעודת זהות (9 ספרות)</label>
+          <input id="loginId" inputmode="numeric" maxlength="9" placeholder="לדוגמה: 331131581">
+        </div>
+        <div>
+          <label>סיסמה</label>
+          <input id="loginPw" type="password" placeholder="******">
+        </div>
+      </div>
+      <div class="toolbar" style="margin-top:10px">
+        <button class="pri" onclick="login()">כניסה</button>
+        <button onclick="showPane('registerPane')">להרשמה</button>
+      </div>
+      <div id="loginMsg" class="note" style="margin-top:8px"></div>
+      <div class="hr"></div>
+      <div class="grid cols-3">
+        <div class="item">
+          <div class="pill pri">מנהל ראשי</div>
+          <div class="mono" style="margin-top:6px">ת״ז: 331131581<br>סיסמה: 35810205</div>
+          <div class="note">שם במערכת: “יהודה‑ניהול”.</div>
+        </div>
+        <div class="item">
+          <div class="pill ok">מנהלים משניים</div>
+          <div class="note">ניתן להוספה רק מתוך הניהול, ורק לאחר הזנת סיסמת‑על 35810205.</div>
+        </div>
+        <div class="item">
+          <div class="pill warn">שמירת נתונים</div>
+          <div class="note">הכל נשמר מקומית בדפדפן. לניקוי – מחיקת אחסון מקומי.</div>
+        </div>
+      </div>
+    </div>
+
+    <div id="registerPane" class="card grow hide">
+      <h2>הרשמה (בדרישת אישור מנהל)</h2>
+      <div class="grid cols-2">
+        <div>
+          <label>תעודת זהות (9 ספרות)</label>
+          <input id="regId" inputmode="numeric" maxlength="9" placeholder="לדוגמה: 123456782">
+        </div>
+        <div>
+          <label>סיסמה (נקבעת בהרשמה)</label>
+          <input id="regPw" type="password" placeholder="בחר סיסמה">
+        </div>
+        <div class="grid cols-2" style="grid-column:1/-1">
+          <div>
+            <label>שם מלא</label>
+            <input id="regName" placeholder="שם פרטי ושם משפחה">
+          </div>
+          <div>
+            <label>הערה למנהל (אופציונלי)</label>
+            <input id="regNote" maxlength="100" placeholder="עד 100 תווים">
+          </div>
+        </div>
+      </div>
+      <div class="toolbar" style="margin-top:10px">
+        <button class="pri" onclick="submitRegistration()">שליחת בקשת הצטרפות</button>
+        <button onclick="showPane('none')">ביטול</button>
+      </div>
+      <div id="regMsg" class="note" style="margin-top:8px"></div>
+    </div>
+  </div>
+
+  <!-- תפריט משתמש -->
+  <div id="userArea" class="hide">
+    <div class="row">
+      <div class="card grow">
+        <h2 id="helloUser">שלום</h2>
+        <div class="toolbar">
+          <button class="pri" onclick="showUserTab('report')">דיווח שעות</button>
+          <button onclick="showUserTab('account')">החשבון שלי</button>
+          <button onclick="showUserTab('inbox')">פניה למנהל</button>
+          <button class="warn" onclick="logout()">התנתקות</button>
+        </div>
+        <div id="userNotice" class="note" style="margin-top:8px"></div>
+      </div>
+      <div class="card" style="min-width:260px">
+        <div><span class="pill ok">סטטוס</span></div>
+        <div style="margin-top:8px">דוחות בהמתנה: <b id="uPendCount">0</b></div>
+        <div>דוחות מאושרים: <b id="uApprovedCount">0</b></div>
+        <div>יתרה מאושרת (₪): <b id="uBalance">0</b></div>
+        <div>תעריף לשעה (₪): <b id="uRate">45</b></div>
+      </div>
+    </div>
+
+    <!-- לשונית דיווח -->
+    <div id="tabReport" class="card hide">
+      <h2>דיווח שעות</h2>
+      <div class="note">ברירת מחדל: 45 ₪ לשעה (אלא אם המנהל שינה לך תעריף אישי).</div>
+      <div class="grid cols-3" style="margin-top:8px">
+        <div>
+          <label>שנה (שתי ספרות)</label>
+          <input id="rYY" inputmode="numeric" maxlength="2" placeholder="25-27">
+        </div>
+        <div>
+          <label>חודש (שתי ספרות)</label>
+          <input id="rMM" inputmode="numeric" maxlength="2" placeholder="01-12">
+        </div>
+        <div>
+          <label>יום (שתי ספרות)</label>
+          <input id="rDD" inputmode="numeric" maxlength="2" placeholder="01-31">
+        </div>
+        <div>
+          <label>שעת התחלה (HHMM)</label>
+          <input id="rStart" inputmode="numeric" maxlength="4" placeholder="0830">
+        </div>
+        <div>
+          <label>שעת יציאה (HHMM)</label>
+          <input id="rEnd" inputmode="numeric" maxlength="4" placeholder="1710">
+        </div>
+        <div>
+          <label>מונית</label>
+          <select id="rTaxi">
+            <option value="no">לא</option>
+            <option value="yes">כן – לזיכוי לפי מנהל</option>
+            <option value="sum">הזן סכום מדויק</option>
+          </select>
+        </div>
+        <div id="taxiSumBox" class="hide">
+          <label>סכום מונית (₪)</label>
+          <input id="rTaxiSum" inputmode="decimal" placeholder="לדוגמה: 35">
+        </div>
+      </div>
+      <div class="note" style="margin-top:6px">
+        שים לב: אם שילמת על מונית – שלח הודעה למנהל בתפריט הראשי ותזוכה על כך.
+      </div>
+      <div class="toolbar" style="margin-top:10px">
+        <button class="pri" onclick="previewReport()">סיכום</button>
+        <button onclick="resetReport()">איפוס</button>
+      </div>
+      <div id="reportPreview" class="item hide" style="margin-top:10px"></div>
+      <div class="toolbar hide" id="reportActions" style="margin-top:8px">
+        <button class="ok" onclick="submitReport()">אישור ושליחה</button>
+        <button onclick="editReport()">שינוי פרטי העבודה</button>
+      </div>
+      <div id="reportMsg" class="note" style="margin-top:8px"></div>
+    </div>
+
+    <!-- לשונית חשבון -->
+    <div id="tabAccount" class="card hide">
+      <h2>החשבון שלי</h2>
+      <div id="pendingNote" class="note"></div>
+      <div class="hr"></div>
+      <h3>יתרה מאושרת</h3>
+      <div class="grid cols-3">
+        <div class="item"><div>סה״כ ₪</div><div class="tot" id="accTotal">0</div></div>
+        <div class="item"><div>דוחות מאושרים</div><div class="tot" id="accApprovedN">0</div></div>
+        <div class="item"><div>תעריף לשעה (נוכחי)</div><div class="tot" id="accRate">45</div></div>
+      </div>
+      <div class="hr"></div>
+      <h3>דוחות מאושרים</h3>
+      <div id="accApprovedList" class="list"></div>
+    </div>
+
+    <!-- לשונית פניה -->
+    <div id="tabInbox" class="card hide">
+      <h2>פניה למנהל הראשי</h2>
+      <label>טקסט עד 100 תווים</label>
+      <input id="msgToAdmin" maxlength="100" placeholder="כתוב כאן הודעה קצרה למנהל הראשי בלבד">
+      <div class="toolbar" style="margin-top:10px">
+        <button class="pri" onclick="sendMsgToAdmin()">שליחה</button>
+      </div>
+      <div id="inboxMsg" class="note" style="margin-top:8px"></div>
+    </div>
+  </div>
+
+  <!-- תפריט ניהול -->
+  <div id="adminArea" class="hide">
+    <div class="row">
+      <div class="card grow">
+        <h2 id="helloAdmin">ניהול – שלום</h2>
+        <div class="toolbar">
+          <button class="pri" onclick="showAdminTab('pendingUsers')">בקשות הצטרפות</button>
+          <button onclick="showAdminTab('pendingReports')">דוחות בהמתנה</button>
+          <button onclick="showAdminTab('quickAddHours')">עדכון שעות על אחרים</button>
+          <button onclick="showAdminTab('accounts')">חשבון לפי שם</button>
+          <button onclick="showAdminTab('settings')">כלים וניהול</button>
+          <button class="warn" onclick="logout()">התנתקות</button>
+        </div>
+        <div id="adminHeadNote" class="note" style="margin-top:8px"></div>
+      </div>
+      <div class="card" style="min-width:260px">
+        <div><span class="pill pri">התראות</span></div>
+        <div style="margin-top:8px">בקשות הצטרפות: <b id="aJoinN">0</b></div>
+        <div>דוחות לאישור: <b id="aRepN">0</b></div>
+        <div>הודעות חדשות: <b id="aMsgN">0</b></div>
+      </div>
+    </div>
+
+    <!-- טאב בקשות הצטרפות -->
+    <div id="tabPendingUsers" class="card hide">
+      <h2>בקשות הצטרפות</h2>
+      <div id="pendingUsersList" class="list"></div>
+    </div>
+
+    <!-- טאב דוחות בהמתנה -->
+    <div id="tabPendingReports" class="card hide">
+      <h2>דוחות ממתינים לאישור</h2>
+      <div id="pendingReportsList" class="list"></div>
+    </div>
+
+    <!-- טאב עדכון מהיר לאחרים -->
+    <div id="tabQuickAddHours" class="card hide">
+      <h2>עדכון שעות על אחרים (מהיר)</h2>
+      <div class="grid cols-3">
+        <div>
+          <label>שנה (שתי ספרות, 25–27)</label>
+          <input id="qaYY" maxlength="2" inputmode="numeric">
+        </div>
+        <div>
+          <label>חודש (שתי ספרות)</label>
+          <input id="qaMM" maxlength="2" inputmode="numeric">
+        </div>
+        <div>
+          <label>יום (שתי ספרות)</label>
+          <input id="qaDD" maxlength="2" inputmode="numeric">
+        </div>
+        <div>
+          <label>שעת התחלה (HHMM)</label>
+          <input id="qaStart" maxlength="4" inputmode="numeric">
+        </div>
+        <div>
+          <label>שעת יציאה (HHMM)</label>
+          <input id="qaEnd" maxlength="4" inputmode="numeric">
+        </div>
+        <div>
+          <label>סכום לשעה (₪)</label>
+          <input id="qaRate" inputmode="decimal" placeholder="ברירת מחדל 45">
+        </div>
+        <div style="grid-column:1/-1">
+          <label>שמות עובדים (קיימים), מופרדים בפסיקים</label>
+          <input id="qaNames" placeholder="לדוגמה: משה כהן, דנה לוי">
+        </div>
+      </div>
+      <div class="toolbar" style="margin-top:10px">
+        <button class="pri" onclick="quickAdd()">עדכון דוחות מאושרים</button>
+        <button onclick="clearQuickAdd()">איפוס</button>
+      </div>
+      <div id="qaMsg" class="note" style="margin-top:8px"></div>
+    </div>
+
+    <!-- טאב חשבון לפי שם -->
+    <div id="tabAccounts" class="card hide">
+      <h2>זיהוי חשבון לפי שם (ללא ת"ז/סיסמה)</h2>
+      <div class="grid cols-3">
+        <div class="grow">
+          <label>שם מלא</label>
+          <input id="accNameSearch" placeholder="הקלד שם">
+        </div>
+        <div style="align-self:end">
+          <button class="pri" onclick="lookupByName()">חיפוש</button>
+        </div>
+      </div>
+      <div id="accLookupBox" class="item hide" style="margin-top:10px"></div>
+    </div>
+
+    <!-- טאב כלים וניהול -->
+    <div id="tabSettings" class="card hide">
+      <h2>כלים וניהול</h2>
+      <div class="grid cols-3">
+        <div class="item">
+          <div class="pill ok">שינוי תעריף משתמש</div>
+          <label style="margin-top:6px">תעודת זהות</label>
+          <input id="rateId" maxlength="9" inputmode="numeric">
+          <label>תעריף חדש (₪)</label>
+          <input id="rateVal" inputmode="decimal">
+          <div class="toolbar" style="margin-top:8px">
+            <button class="pri" onclick="setUserRate()">שמירה</button>
+          </div>
+          <div id="rateMsg" class="note" style="margin-top:6px"></div>
+        </div>
+        <div class="item">
+          <div class="pill warn">זיכוי/חיוב ידני</div>
+          <label style="margin-top:6px">תעודת זהות</label>
+          <input id="adjId" maxlength="9" inputmode="numeric">
+          <label>סכום (חיובי לזיכוי, שלילי לחיוב)</label>
+          <input id="adjVal" inputmode="decimal" placeholder="לדוגמה: 120 או ‎-50">
+          <label>הסבר קצר</label>
+          <input id="adjNote" maxlength="100">
+          <div class="toolbar" style="margin-top:8px">
+            <button class="pri" onclick="adjustBalance()">ביצוע</button>
+          </div>
+          <div id="adjMsg" class="note" style="margin-top:6px"></div>
+        </div>
+        <div class="item">
+          <div class="pill pri">הוספת מנהל משני</div>
+          <div class="note">נדרש להזין כאן את סיסמת‑העל של המנהל הראשי בדווקא: <b>35810205</b>.</div>
+          <label style="margin-top:6px">סיסמת‑על (אימות)</label>
+          <input id="superPw" type="password" placeholder="35810205">
+          <label>ת״ז מנהל חדש</label>
+          <input id="mgrId" maxlength="9" inputmode="numeric">
+          <label>שם מנהל</label>
+          <input id="mgrName">
+          <label>סיסמת מנהל</label>
+          <input id="mgrPw" type="password">
+          <div class="toolbar" style="margin-top:8px">
+            <button class="pri" onclick="addManager()">הוספה</button>
+          </div>
+          <div id="mgrMsg" class="note" style="margin-top:6px"></div>
+        </div>
+      </div>
+
+      <div class="hr"></div>
+      <div class="item">
+        <div class="pill err">כלי תחזוקה</div>
+        <div class="note" style="margin-top:6px">גיבוי/ניקוי נתונים (מקומי בלבד).</div>
+        <div class="toolbar" style="margin-top:8px">
+          <button onclick="downloadBackup()">הורדת גיבוי JSON</button>
+          <button class="err" onclick="clearAll()">ניקוי מוחלט (זהירות!)</button>
+        </div>
+        <input id="importFile" type="file" accept="application/json" style="margin-top:8px" onchange="importBackup(event)">
+        <div class="note" id="maintMsg" style="margin-top:6px"></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+/*** אחסון ונתונים ***/
+const KEY="hrs_app_v1";
+
+function loadDB(){
+  const raw=localStorage.getItem(KEY);
+  let db = raw? JSON.parse(raw) : null;
+  if(!db){
+    db = {
+      users:[],
+      pendingUsers:[],
+      reports:[], // {id, userId, byName, dateISO, start,end, minutes, rate, amount, taxiType,taxiSum,status, createdAt}
+      messages:[], // {to:'main', fromUserId, fromName, text, createdAt, read:false}
+      meta:{createdAt:new Date().toISOString()}
+    };
+    // יצירת מנהל ראשי אם חסר
+    const mainId="331131581";
+    const hasMain = db.users.some(u=>u.id===mainId && u.role==='manager' && u.main===true);
+    if(!hasMain){
+      db.users.push({id:mainId,name:"יהודה-ניהול",pw:"35810205",role:"manager",main:true,rate:50,balance:0,createdAt:new Date().toISOString()});
+    }
+    saveDB(db);
+  }
+  return db;
+}
+function saveDB(db){ localStorage.setItem(KEY, JSON.stringify(db)); }
+let DB = loadDB();
+let SESSION = { who:null, role:null }; // who = user object
+
+/*** עזרי ולידציה ***/
+// בדיקת ת"ז ישראלית – 9 ספרות + ספרת ביקורת
+function isValidTZ(id){
+  if(!/^\d{9}$/.test(id)) return false;
+  const digits = id.split('').map(d=>parseInt(d,10));
+  let sum=0;
+  for(let i=0;i<9;i++){
+    let inc = digits[i] * (i%2?2:1);
+    if(inc>9) inc -= 9;
+    sum += inc;
+  }
+  return sum%10===0;
+}
+function pad2(n){ return n.toString().padStart(2,'0'); }
+function num(v){ return Number(v||0); }
+function clamp(n,min,max){ return Math.max(min,Math.min(max,n)); }
+
+/*** UI ***/
+function showPane(id){
+  document.getElementById('registerPane').classList.toggle('hide', id!=='registerPane');
+  if(id==='registerPane'){ document.getElementById('regMsg').textContent=''; }
+}
+function notify(el,msg,cls=''){
+  el.textContent=msg; el.className='note ' + (cls||'');
+}
+function logout(){
+  SESSION={who:null,role:null};
+  document.getElementById('auth').classList.remove('hide');
+  document.getElementById('userArea').classList.add('hide');
+  document.getElementById('adminArea').classList.add('hide');
+  document.getElementById('loginPw').value='';
+}
+
+function login(){
+  const id = document.getElementById('loginId').value.trim();
+  const pw = document.getElementById('loginPw').value;
+  const msg = document.getElementById('loginMsg');
+  if(!/^\d{9}$/.test(id)){ return notify(msg,'יש להזין תעודת זהות בת 9 ספרות.',''); }
+  const user = DB.users.find(u=>u.id===id && u.pw===pw);
+  // אם לא נמצא – בדיקה אם ממתין לאישור
+  if(!user){
+    if(DB.pendingUsers.some(p=>p.id===id)){
+      return notify(msg,'ההרשמה שלך ממתינה לאישור מנהל.','');
+    }
+    return notify(msg,'פרטי ההתחברות שגויים או אינך מאושר במערכת.','');
+  }
+  SESSION.who = user;
+  SESSION.role = user.role;
+  document.getElementById('auth').classList.add('hide');
+  if(user.role==='manager'){
+    openAdmin();
+  }else{
+    openUser();
+  }
+}
+
+function submitRegistration(){
+  const id=document.getElementById('regId').value.trim();
+  const pw=document.getElementById('regPw').value;
+  const name=document.getElementById('regName').value.trim();
+  const note=document.getElementById('regNote').value.trim();
+  const msg=document.getElementById('regMsg');
+  if(!/^\d{9}$/.test(id)) return notify(msg,'חובה להזין ת״ז 9 ספרות.','');
+  if(!isValidTZ(id)) return notify(msg,'תעודת זהות לא תקינה (ספרת ביקורת).','');
+  if(!pw) return notify(msg,'חובה להזין סיסמה.','');
+  if(!name) return notify(msg,'חובה להזין שם.','');
+  if(DB.users.some(u=>u.id===id) || DB.pendingUsers.some(p=>p.id===id)){
+    return notify(msg,'קיים משתמש/בקשה 
